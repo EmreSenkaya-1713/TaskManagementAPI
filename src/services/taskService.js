@@ -1,61 +1,172 @@
-const tasks = [
-    {
-        id: 1,
-        title: "Node.js çalış",
-        completed: false
-    },
-    {
-        id: 2,
-        title: "Express öğren",
-        completed: true
-    }
-];
+const { sql, connectDatabase } = require("../config/database");
 
-const getAllTasks = () => {
-    return tasks;
+const getAllTasks = async () => {
+    const pool = await connectDatabase();
+
+    const result = await pool
+        .request()
+        .query(`
+            SELECT
+                Id,
+                Title,
+                Description,
+                Completed,
+                Priority,
+                DueDate,
+                UserId,
+                CreatedAt,
+                UpdatedAt
+            FROM Tasks
+            ORDER BY Id DESC
+        `);
+
+    return result.recordset;
 };
 
-const getTaskById = (id) => {
-    return tasks.find((task) => task.id === id);
+const getTaskById = async (id) => {
+    const pool = await connectDatabase();
+
+    const result = await pool
+        .request()
+        .input("id", id)
+        .query(`
+            SELECT
+                Id,
+                Title,
+                Description,
+                Completed,
+                Priority,
+                DueDate,
+                UserId,
+                CreatedAt,
+                UpdatedAt
+            FROM Tasks
+            WHERE Id = @id
+        `);
+
+    return result.recordset[0];
 };
 
-const createTask = (title, completed) => {
-
-    const newTask = {
-    id: tasks.length + 1,
+const createTask = async ({
     title,
-    completed
+    description,
+    completed,
+    priority,
+    dueDate,
+    userId
+}) => {
+    const pool = await connectDatabase();
+
+    const result = await pool
+        .request()
+        .input("title", sql.NVarChar(200), title)
+        .input("description", sql.NVarChar(500), description || null)
+        .input("completed", sql.Bit, completed ?? false)
+        .input("priority", sql.NVarChar(20), priority || "Medium")
+        .input("dueDate", sql.DateTime2, dueDate || null)
+        .input("userId", sql.Int, userId || null)
+        .query(`
+            INSERT INTO Tasks (
+                Title,
+                Description,
+                Completed,
+                Priority,
+                DueDate,
+                UserId
+            )
+            OUTPUT
+                INSERTED.Id,
+                INSERTED.Title,
+                INSERTED.Description,
+                INSERTED.Completed,
+                INSERTED.Priority,
+                INSERTED.DueDate,
+                INSERTED.UserId,
+                INSERTED.CreatedAt,
+                INSERTED.UpdatedAt
+            VALUES (
+                @title,
+                @description,
+                @completed,
+                @priority,
+                @dueDate,
+                @userId
+            )
+        `);
+
+    return result.recordset[0];
 };
-tasks.push(newTask);
-return newTask;
 
-};
-
-const updateTask = (id, title, completed) => {
-    const task = tasks.find((task) => task.id === id);
-
-    if (!task) {
-        return null;
+const updateTask = async (
+    id,
+    {
+        title,
+        description,
+        completed,
+        priority,
+        dueDate,
+        userId
     }
+) => {
+    const pool = await connectDatabase();
 
-    task.title = title;
-    task.completed = completed;
+    const result = await pool
+        .request()
+        .input("id", sql.Int, id)
+        .input("title", sql.NVarChar(200), title)
+        .input("description", sql.NVarChar(500), description || null)
+        .input("completed", sql.Bit, completed ?? false)
+        .input("priority", sql.NVarChar(20), priority || "Medium")
+        .input("dueDate", sql.DateTime2, dueDate || null)
+        .input("userId", sql.Int, userId || null)
+        .query(`
+            UPDATE Tasks
+            SET
+                Title = @title,
+                Description = @description,
+                Completed = @completed,
+                Priority = @priority,
+                DueDate = @dueDate,
+                UserId = @userId,
+                UpdatedAt = GETDATE()
+            OUTPUT
+                INSERTED.Id,
+                INSERTED.Title,
+                INSERTED.Description,
+                INSERTED.Completed,
+                INSERTED.Priority,
+                INSERTED.DueDate,
+                INSERTED.UserId,
+                INSERTED.CreatedAt,
+                INSERTED.UpdatedAt
+            WHERE Id = @id
+        `);
 
-    return task;
+    return result.recordset[0];
 };
 
-const deleteTask = (id) => {
-    const index = tasks.findIndex((task) => task.id === id);
+const deleteTask = async (id) => {
+    const pool = await connectDatabase();
 
-    if (index === -1) {
-        return null;
-    }
+    const result = await pool
+        .request()
+        .input("id", sql.Int, id)
+        .query(`
+            DELETE FROM Tasks
+            OUTPUT
+                DELETED.Id,
+                DELETED.Title,
+                DELETED.Description,
+                DELETED.Completed,
+                DELETED.Priority,
+                DELETED.DueDate,
+                DELETED.UserId,
+                DELETED.CreatedAt,
+                DELETED.UpdatedAt
+            WHERE Id = @id
+        `);
 
-    const deletedTask = tasks[index];
-
-    tasks.splice(index, 1);
-
-    return deletedTask;
+    return result.recordset[0];
 };
 
 module.exports = {
