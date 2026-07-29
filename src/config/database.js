@@ -17,11 +17,11 @@ const connectDatabase = async () => {
     try {
         const pool = await sql.connect(dbConfig);
 
-        console.log("✅ MSSQL bağlantısı başarılı.");
+        console.log(" MSSQL bağlantısı başarılı.");
 
         return pool;
     } catch (error) {
-        console.error("❌ Veritabanı bağlantı hatası:");
+        console.error(" Veritabanı bağlantı hatası:");
         console.error(error);
 
         throw error;
