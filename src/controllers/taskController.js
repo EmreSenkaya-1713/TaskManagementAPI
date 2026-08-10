@@ -8,7 +8,8 @@ const {
 
 const getTasks = async (req, res) => {
     try {
-        const tasks = await getAllTasks();
+        const userId = req.user.userId;
+        const tasks = await getAllTasks(userId);
 
         res.json(tasks);
     } catch (error) {
@@ -23,14 +24,10 @@ const getTasks = async (req, res) => {
 const getTask = async (req, res) => {
     try {
         const id = Number(req.params.id);
+        const userId = req.user.userId;
 
-        if (!Number.isInteger(id) || id <= 0) {
-            return res.status(400).json({
-                message: "Geçerli bir görev ID'si gönderilmelidir."
-            });
-        }
 
-        const task = await getTaskById(id);
+        const task = await getTaskById(id, userId);
 
         if (!task) {
             return res.status(404).json({
@@ -39,7 +36,6 @@ const getTask = async (req, res) => {
         }
 
         res.json(task);
-
     } catch (error) {
         console.error("Görev getirilirken hata oluştu:", error);
 
@@ -51,20 +47,16 @@ const getTask = async (req, res) => {
 
 const addTask = async (req, res) => {
     try {
+        const userId = req.user.userId;
+
         const {
             title,
             description,
             completed,
             priority,
-            dueDate,
-            userId
+            dueDate
         } = req.body;
 
-        if (!title || !title.trim()) {
-            return res.status(400).json({
-                message: "Görev başlığı zorunludur."
-            });
-        }
 
         const task = await createTask({
             title: title.trim(),
@@ -74,7 +66,6 @@ const addTask = async (req, res) => {
             dueDate,
             userId
         });
-        
 
         res.status(201).json(task);
     } catch (error) {
@@ -89,6 +80,7 @@ const addTask = async (req, res) => {
 const editTask = async (req, res) => {
     try {
         const id = Number(req.params.id);
+        const userId = req.user.userId;
 
         if (!Number.isInteger(id) || id <= 0) {
             return res.status(400).json({
@@ -101,23 +93,21 @@ const editTask = async (req, res) => {
             description,
             completed,
             priority,
-            dueDate,
-            userId
+            dueDate
         } = req.body;
 
-        if (!title || !title.trim()) {
+        if (typeof title !== "string" || !title.trim()) {
             return res.status(400).json({
                 message: "Görev başlığı zorunludur."
             });
         }
 
-        const task = await updateTask(id, {
+        const task = await updateTask(id, userId, {
             title: title.trim(),
             description,
             completed,
             priority,
-            dueDate,
-            userId
+            dueDate
         });
 
         if (!task) {
@@ -139,6 +129,7 @@ const editTask = async (req, res) => {
 const removeTask = async (req, res) => {
     try {
         const id = Number(req.params.id);
+        const userId = req.user.userId;
 
         if (!Number.isInteger(id) || id <= 0) {
             return res.status(400).json({
@@ -146,7 +137,7 @@ const removeTask = async (req, res) => {
             });
         }
 
-        const deletedTask = await deleteTask(id);
+        const deletedTask = await deleteTask(id, userId);
 
         if (!deletedTask) {
             return res.status(404).json({
