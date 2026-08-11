@@ -82,12 +82,6 @@ const editTask = async (req, res) => {
         const id = Number(req.params.id);
         const userId = req.user.userId;
 
-        if (!Number.isInteger(id) || id <= 0) {
-            return res.status(400).json({
-                message: "Geçerli bir görev ID'si gönderilmelidir."
-            });
-        }
-
         const {
             title,
             description,
@@ -96,18 +90,12 @@ const editTask = async (req, res) => {
             dueDate
         } = req.body;
 
-        if (typeof title !== "string" || !title.trim()) {
-            return res.status(400).json({
-                message: "Görev başlığı zorunludur."
-            });
-        }
-
         const task = await updateTask(id, userId, {
-            title: title.trim(),
-            description,
-            completed,
-            priority,
-            dueDate
+            title: title?.trim(),
+            description: description ?? null,
+            completed: completed ?? false,
+            priority: priority || "Medium",
+            dueDate: dueDate || null
         });
 
         if (!task) {

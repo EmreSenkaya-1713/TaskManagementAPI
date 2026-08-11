@@ -1,42 +1,47 @@
 # Task Management API
 
-Node.js, Express.js ve Microsoft SQL Server kullanılarak geliştirilmiş bir REST API projesidir.
+A RESTful Task Management API built with Node.js, Express, Microsoft SQL Server, and JWT authentication.
 
-Kullanıcılar sisteme kayıt olabilir, giriş yapabilir ve JWT authentication ile kendi görevlerini yönetebilir.
+This backend provides authentication, task management, validation, and protected API endpoints for the Task Management frontend application.
 
 ## Features
 
 - User registration
 - User login
-- JWT authentication
 - Password hashing with bcrypt
-- Create task
+- JWT authentication
+- Protected routes
+- User-specific task management
+- Create tasks
 - Get all tasks
 - Get task by ID
-- Update task
-- Delete task
-- User-specific task management
+- Update tasks
+- Delete tasks
+- Mark tasks as completed
 - Request validation
 - Error handling
 - Swagger API documentation
-- MSSQL database integration
+- Microsoft SQL Server integration
 
 ## Technologies
 
 - Node.js
 - Express.js
 - Microsoft SQL Server
-- JWT
+- mssql
 - bcrypt
+- jsonwebtoken
 - express-validator
-- Swagger / OpenAPI
+- Swagger
+- swagger-ui-express
+- swagger-jsdoc
 - dotenv
+- cors
 
 ## Project Structure
 
 ```text
 TaskManagementAPI/
-│
 ├── src/
 │   ├── config/
 │   │   ├── database.js
@@ -50,115 +55,17 @@ TaskManagementAPI/
 │   │   ├── errorMiddleware.js
 │   │   ├── taskValidation.js
 │   │   └── validationMiddleware.js
+│   ├── models/
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   └── taskRoutes.js
-│   └── services/
-│       ├── authService.js
-│       └── taskService.js
-│
+│   ├── services/
+│   │   ├── authService.js
+│   │   └── taskService.js
+│   └── utils/
 ├── .env.example
 ├── .gitignore
 ├── package.json
-├── server.js
-└── README.md
-```
-
-## Installation
-
-Projeyi bilgisayarınıza klonlayın:
-
-```bash
-git clone <repository-url>
-```
-
-Proje klasörüne girin:
-
-```bash
-cd TaskManagementAPI
-```
-
-Gerekli paketleri yükleyin:
-
-```bash
-npm install
-```
-
-`.env.example` dosyasını `.env` olarak kopyalayın ve kendi veritabanı bilgilerinizi girin.
-
-Örnek:
-
-```env
-PORT=3000
-
-DB_SERVER=localhost
-DB_DATABASE=TaskManagementDB
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-
-DB_ENCRYPT=true
-DB_TRUST_SERVER_CERTIFICATE=true
-
-JWT_SECRET=your_jwt_secret
-```
-
-## Running the Project
-
-Development modunda çalıştırmak için:
-
-```bash
-npm run dev
-```
-
-Server varsayılan olarak:
-
-```text
-http://localhost:3000
-```
-
-adresinde çalışır.
-
-## API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/auth/register | Yeni kullanıcı oluşturur |
-| POST | /api/auth/login | Kullanıcı girişi yapar |
-
-### Tasks
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | /api/tasks | Kullanıcının görevlerini getirir |
-| GET | /api/tasks/:id | Belirli bir görevi getirir |
-| POST | /api/tasks | Yeni görev oluşturur |
-| PUT | /api/tasks/:id | Görevi günceller |
-| DELETE | /api/tasks/:id | Görevi siler |
-
-Task endpointleri JWT authentication gerektirir.
-
-## Swagger Documentation
-
-API çalıştırıldıktan sonra Swagger dokümantasyonuna aşağıdaki adresten ulaşabilirsiniz:
-
-```text
-http://localhost:3000/api-docs
-```
-
-Swagger üzerinden endpointleri görüntüleyebilir ve test edebilirsiniz.
-
-## Authentication
-
-Başarılı giriş işleminden sonra API bir JWT token döndürür.
-
-Korunan endpointlere istek gönderirken token Bearer Token olarak kullanılmalıdır:
-
-```text
-Authorization: Bearer <token>
-```
-
-## Author
-
-Emre Şenkaya
+├── package-lock.json
+├── README.md
+└── server.js

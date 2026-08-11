@@ -99,13 +99,13 @@ const createTask = async ({
 
 const updateTask = async (
     id,
+    userId,
     {
         title,
         description,
         completed,
         priority,
-        dueDate,
-        userId
+        dueDate
     }
 ) => {
     const pool = await connectDatabase();
@@ -113,12 +113,12 @@ const updateTask = async (
     const result = await pool
         .request()
         .input("id", sql.Int, id)
+        .input("userId", sql.Int, userId)
         .input("title", sql.NVarChar(200), title)
-        .input("description", sql.NVarChar(500), description || null)
+        .input("description", sql.NVarChar(500), description ?? null)
         .input("completed", sql.Bit, completed ?? false)
         .input("priority", sql.NVarChar(20), priority || "Medium")
         .input("dueDate", sql.DateTime2, dueDate || null)
-        .input("userId", sql.Int, userId || null)
         .query(`
             UPDATE Tasks
             SET
@@ -127,7 +127,6 @@ const updateTask = async (
                 Completed = @completed,
                 Priority = @priority,
                 DueDate = @dueDate,
-                UserId = @userId,
                 UpdatedAt = GETDATE()
             OUTPUT
                 INSERTED.Id,
@@ -140,6 +139,7 @@ const updateTask = async (
                 INSERTED.CreatedAt,
                 INSERTED.UpdatedAt
             WHERE Id = @id
+              AND UserId = @userId
         `);
 
     return result.recordset[0];
